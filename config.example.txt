@@ -1,0 +1,161 @@
+# ═══════════════════════════════════════════════════════════════════
+#           🎵 UNIVERSAL DISCORD MUSIC BOT - CONFIGURATION
+# ═══════════════════════════════════════════════════════════════════
+#
+# DEPLOYMENT: wispbyte.com
+# Support: YouTube, SoundCloud, Bandcamp, Spotify, 1800+ sites
+#
+# ═══════════════════════════════════════════════════════════════════
+
+# ─────────────────────────────────────────────────────────────────
+#                    🔑 REQUIRED SETTINGS
+# ─────────────────────────────────────────────────────────────────
+
+# Your Discord bot token (REQUIRED - get from Discord Developer Portal)
+token=YOUR_BOT_TOKEN_HERE
+
+# ─────────────────────────────────────────────────────────────────
+#                    ⚙️ BOT SETTINGS
+# ─────────────────────────────────────────────────────────────────
+
+# Command prefix (can have multiple, separated by commas)
+prefix=!!,!
+
+# Bot owner's Discord user ID (for admin commands like update, clearcache, restart)
+# Right-click your profile in Discord and "Copy User ID"
+owner=
+# Bot activity status shown in Discord
+game=Music Bot
+
+# Online status: online, idle, dnd, invisible
+status=online
+
+# ─────────────────────────────────────────────────────────────────
+#                    ✨ FEATURE TOGGLES
+# ─────────────────────────────────────────────────────────────────
+
+# Enable slash commands (/play, /skip, etc.)
+use_slash_commands=true
+
+# Enable loop feature (loop, stoploop commands)
+use_loop_feature=true
+
+# ─────────────────────────────────────────────────────────────────
+#                    🎧 AUDIO SETTINGS
+# ─────────────────────────────────────────────────────────────────
+
+# FFmpeg threads (1-4, higher = more CPU usage)
+ffmpeg_threads=2
+
+# Audio buffer size in KB (128-512)
+buffer_size=256
+
+# Audio sample rate (44100 or 48000)
+sample_rate=48000
+
+# ─────────────────────────────────────────────────────────────────
+#                    📋 PLAYLIST LIMITS
+# ─────────────────────────────────────────────────────────────────
+
+# Maximum songs to fetch from regular playlists (1-1000)
+playlist_limit=250
+
+# Maximum songs to fetch from YouTube Mixes (1-500)
+mix_limit=250
+
+# ─────────────────────────────────────────────────────────────────
+#                    🔧 ADVANCED SETTINGS
+# ─────────────────────────────────────────────────────────────────
+
+# Heartbeat timeout in seconds (30-120)
+heartbeat_timeout=60.0
+
+# HTTP/HTTPS proxy (leave empty if not needed)
+proxy=
+
+# Cookie file path for age-restricted content (DISABLED by default)
+# Set to empty to disable
+cookie_file=
+
+# Use browser cookies for YouTube age-restricted content (DISABLED)
+use_browser_cookies=false
+
+# YouTube player clients for yt-dlp (comma separated). Leave EMPTY for the
+# fast yt-dlp default (needs Deno, which the launcher installs into bin/).
+# Old wide list, slower (~4s per song): web,web_embedded,mweb,android,ios,default
+youtube_player_clients=
+
+# Idle auto-clear: disconnect voice channels after N hours of inactivity (0 to disable)
+idle_clear_hours=1
+
+# ─────────────────────────────────────────────────────────────────
+#                    📝 COMMAND ALIASES
+# ─────────────────────────────────────────────────────────────────
+
+cmd_play=
+cmd_pause=
+cmd_resume=
+cmd_skip=
+cmd_stop=
+cmd_queue=
+cmd_clear=
+cmd_join=
+cmd_leave=
+cmd_volume=
+cmd_loop=lo,lp
+cmd_stoploop=stlo,sloop,stopl,sl
+cmd_update=update,u,upd
+cmd_clearcache=cc,clearc,ccache,purge
+cmd_restart=rbot,reboot
+cmd_embedreset=epr
+
+# ─────────────────────────────────────────────────────────────────
+#                    📖 COMMANDS GUIDE
+# ─────────────────────────────────────────────────────────────────
+#
+# PLAYBACK:
+#   !!play <song/URL>  - Play from YouTube, SoundCloud, Spotify, etc.
+#   !!pause            - Pause playback
+#   !!resume           - Resume playback
+#   !!skip [n]         - Skip current (or n songs)
+#   !!stop             - Stop and clear queue
+#
+# QUEUE:
+#   !!queue            - Show current queue
+#   !!clear            - Clear the queue
+#
+# AUDIO:
+#   !!volume [0-200]   - Set or show volume (supports up to 200%)
+#
+# LOOP:
+#   !!loop             - Toggle infinite loop
+#   !!loop 5           - Loop current song 5 times
+#   !!stoploop         - Stop looping, continue queue
+#
+# VOICE:
+#   !!join             - Join your voice channel
+#   !!leave            - Leave voice channel
+#
+# ADMIN (owner only):
+#   !!update           - Update yt-dlp
+#   !!clearcache       - Clear metadata cache
+#   !!restart          - Restart the bot
+#   !!resetplayer      - Reset player panel
+#   !!help             - Show help message
+#
+# ═══════════════════════════════════════════════════════════════════
+#                     🌐 SUPPORTED PLATFORMS
+# ═══════════════════════════════════════════════════════════════════
+#
+# ✅ YouTube (videos, playlists, mixes, shorts)
+# ✅ SoundCloud (tracks, playlists, sets)
+# ✅ Bandcamp (tracks, albums)
+# ✅ Spotify (via search)
+# ✅ Twitch (live streams, clips)
+# ✅ Vimeo
+# ✅ Reddit videos
+# ✅ Twitter/X videos
+# ✅ TikTok, Facebook, Instagram
+# ✅ And 1800+ more sites!
+#
+# ═══════════════════════════════════════════════════════════════════

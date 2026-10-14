@@ -1,0 +1,29 @@
+# Your settings (contains your bot token) — copy config.example.txt instead
+config.txt
+
+# Cookie exports are account credentials
+cookies*.txt
+cookies*.json
+*.cookies
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Tools downloaded by update_deps.py / the launcher
+bin/
+ffmpeg/
+
+# Runtime state written by the launcher/bot
+.bot_heartbeat
+.launcher_bot.pid
+.restart_pending
+*.log
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
