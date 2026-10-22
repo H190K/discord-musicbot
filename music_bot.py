@@ -311,8 +311,9 @@ ytdl_format_options = {
     "skip_download": True,
     "writethumbnail": False,
     "writeinfojson": False,
+    # No User-Agent here: yt-dlp sends its own current browser UA, and
+    # YouTube 403s stream links fetched with an outdated one.
     "http_headers": {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         "Accept-Language": "en-us,en;q=0.5",
         "DNT": "1",
@@ -376,11 +377,13 @@ def build_ytdl_options(extra_options=None, use_cookie_sources=False, skip_youtub
     if use_cookie_sources and COOKIE_BROWSER_SPEC:
         opts["cookiesfrombrowser"] = COOKIE_BROWSER_SPEC
     if skip_youtube_manifests:
-        # Audio comes from the adaptive formats; fetching the HLS/DASH
-        # manifests costs ~0.5s per song. Live streams need them, so callers
-        # retry with skip_youtube_manifests=False when nothing playable came back.
+        # Audio comes from the adaptive formats; fetching the DASH manifest
+        # costs time per song. HLS stays on: YouTube often 403s the direct
+        # (tv client) links, and the HLS audio is the fallback that still plays.
+        # Live streams need DASH too, so callers retry with
+        # skip_youtube_manifests=False when nothing playable came back.
         youtube_args = opts.setdefault("extractor_args", {}).setdefault("youtube", {})
-        youtube_args.setdefault("skip", ["hls", "dash"])
+        youtube_args.setdefault("skip", ["dash"])
     if YOUTUBE_PLAYER_CLIENTS:
         extractor_args = opts.setdefault("extractor_args", {})
         youtube_args = extractor_args.setdefault("youtube", {})
@@ -745,7 +748,12 @@ def slim_stream_info(data):
     slim = {k: data[k] for k in STREAM_INFO_KEYS if data.get(k) is not None}
     if not slim.get("thumbnail") and data.get("thumbnails"):
         slim["thumbnail"] = (data["thumbnails"][-1] or {}).get("url")
-    slim["formats"] = iter_best_audio_formats(data, allow_missing_pot=False)[:STREAM_KEEP_FORMATS]
+    ranked = iter_best_audio_formats(data, allow_missing_pot=False)
+    slim["formats"] = ranked[:STREAM_KEEP_FORMATS]
+    # Always keep one HLS format: it's the fallback when direct links 403.
+    hls = next((f for f in ranked if "m3u8" in (f.get("protocol") or "")), None)
+    if hls is not None and hls not in slim["formats"]:
+        slim["formats"].append(hls)
     slim["_extracted_at"] = data.get("_extracted_at") or time.time()
     return slim
 
@@ -854,6 +862,19 @@ class SilentFFmpegPCMAudio(discord.FFmpegPCMAudio):
         except Exception:
             pass
 
+async def stream_link_works(url, headers):
+    """Quick 1-byte probe: YouTube hands out direct links that 403 on first use.
+    Network trouble counts as working so ffmpeg still gets its own try."""
+    try:
+        async with get_http_session().get(
+            url,
+            headers={**(headers or {}), "Range": "bytes=0-0"},
+            timeout=aiohttp.ClientTimeout(total=4),
+        ) as resp:
+            return resp.status not in (401, 403, 404, 410)
+    except Exception:
+        return True
+
 class YTDLSource(discord.PCMVolumeTransformer):
     __slots__ = ("data", "title", "url", "duration", "webpage_url", "extractor", "thumbnail")
 
@@ -946,12 +967,20 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
         base_opts = ffmpeg_options.copy()
         last_error = None
+        probed = set()
 
-        for candidate in candidate_urls:
+        for i, candidate in enumerate(candidate_urls):
             audio_url = candidate["audio_url"]
             http_headers = candidate["http_headers"] or {}
             opts = base_opts.copy()
             is_hls = "m3u8" in (candidate.get("protocol") or "") or ".m3u8" in (audio_url or "")
+            if extractor_name == "youtube" and not is_hls and i < len(candidate_urls) - 1:
+                if audio_url in probed:
+                    continue
+                probed.add(audio_url)
+                if not await stream_link_works(audio_url, http_headers):
+                    logger.info(f"⏭️ youtube {candidate.get('format_id')} link refused (403), trying next format")
+                    continue
             if is_hls:
                 # Every HLS segment ends in EOF; with -reconnect_at_eof ffmpeg
                 # reconnects forever and never outputs audio (silent SoundCloud).
